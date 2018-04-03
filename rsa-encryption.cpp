@@ -48,9 +48,9 @@ int rsa_find_dkey(int e_key, int t) {
 std::vector<int> rsa_encrypt(rsa_key key, std::string message) {
 	std::vector<int> encrypted;
 	for (int i = 0; i < message.length(); i++) {
-		int new_value = (int)(pow(message[i], key.key) + 0.5) % key.n;
-		encrypted.push_back(new_value);
-		std::cout << new_value << std::endl;
+		double val = fmod(pow(message[i], key.key), key.n);
+		std::cout << "Enc: " << val << std::endl;
+		encrypted.push_back((int)val);
 	}
 	return encrypted;
 }
@@ -58,20 +58,22 @@ std::vector<int> rsa_encrypt(rsa_key key, std::string message) {
 std::string rsa_decrypt(rsa_key key, std::vector<int> encrypted) {
 	std::string message;
 	for (unsigned int i = 0; i < encrypted.size(); i++) {
-		message += (int)(pow(encrypted[i], key.key) + 0.5) % key.n;
+		std::cout << pow(encrypted[i], key.key) << std::endl;
+		double val = fmod(pow(encrypted[i], key.key), key.n);
+		std::cout << "Dec: " << val << std::endl;
+		message += val;
 	}
 	return message;
 }
 
 int main (int argc, char **argv) {
-	int prime_p = 11;
-	int prime_q = 13;
+	int prime_p = 3;
+	int prime_q = 7;
 
 	int n = prime_p *prime_q;
 	int totient = rsa_least_common_multiple(prime_p - 1, prime_q - 1);
 	std::cout << "Totient: " << totient << std::endl;
-	int e_key = rsa_find_ekey(totient);
-	e_key = 7;
+	int e_key = rsa_find_ekey((prime_p-1) * (prime_q-1));
 	std::cout << "E_key: " << e_key << std::endl;
 	int d_key = rsa_find_dkey(e_key, totient);
 	std::cout << "D_key: " << d_key << std::endl;
@@ -84,7 +86,10 @@ int main (int argc, char **argv) {
 	private_key.key = d_key;
 	private_key.n = n;
 
-	std::vector<int> encrypted = rsa_encrypt(public_key, "this is a message");
+	char ch = 't';
+	std::cout << (int)ch << std::endl;
+
+	std::vector<int> encrypted = rsa_encrypt(public_key, "t");
 	std::string decrypted = rsa_decrypt(private_key, encrypted);
 	std::cout << decrypted << std::endl;
 }
